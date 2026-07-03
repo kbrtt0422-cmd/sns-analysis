@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>年商数億の会社がAIで月40時間削減した方法</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; }
+.slide-container { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+.slide { display: none; width: 100%; height: 100%; background: #fff; padding: 60px 80px; flex-direction: column; justify-content: center; position: absolute; top: 0; left: 0; overflow: hidden; }
+.slide.active { display: flex; }
+.slide-number { position: fixed; bottom: 24px; right: 36px; font-size: 16px; color: #94a3b8; z-index: 100; }
+h1 { font-size: clamp(28px, 4vw, 56px); font-weight: 800; color: #1e293b; margin-bottom: 32px; line-height: 1.3; }
+h2 { font-size: clamp(22px, 3vw, 42px); font-weight: 700; color: #1e293b; margin-bottom: 28px; line-height: 1.3; }
+h3 { font-size: clamp(18px, 2vw, 28px); font-weight: 600; color: #475569; margin-bottom: 16px; }
+p, li { font-size: clamp(16px, 1.8vw, 24px); color: #334155; line-height: 1.8; }
+ul { list-style: none; padding: 0; }
+ul li { padding: 8px 0; padding-left: 28px; position: relative; }
+ul li::before { content: ""; position: absolute; left: 0; top: 18px; width: 10px; height: 10px; background: #2563EB; border-radius: 50%; }
+ol { padding-left: 32px; }
+ol li { padding: 6px 0; }
+.accent { color: #2563EB; }
+.big-number { font-size: clamp(48px, 7vw, 96px); font-weight: 900; color: #2563EB; line-height: 1.1; }
+.subtitle { font-size: clamp(14px, 1.5vw, 20px); color: #64748b; margin-top: 12px; line-height: 1.6; }
+.highlight-box { background: #eff6ff; border-left: 5px solid #2563EB; padding: 20px 28px; border-radius: 0 12px 12px 0; margin: 20px 0; }
+.highlight-box p { font-size: clamp(15px, 1.6vw, 22px); color: #1e40af; font-weight: 600; }
+.quote-box { background: #f8fafc; border-left: 5px solid #f59e0b; padding: 20px 28px; border-radius: 0 12px 12px 0; margin: 20px 0; font-style: italic; }
+.quote-box p { color: #92400e; }
+table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: clamp(14px, 1.4vw, 20px); }
+th { background: #2563EB; color: #fff; padding: 14px 20px; text-align: left; font-weight: 600; }
+td { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+tr:nth-child(even) td { background: #f8fafc; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 20px; }
+.card { background: #f8fafc; border-radius: 16px; padding: 28px; border: 1px solid #e2e8f0; }
+.card h3 { color: #2563EB; margin-bottom: 12px; }
+.step-number { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #2563EB; color: #fff; border-radius: 50%; font-weight: 800; font-size: 20px; margin-right: 12px; flex-shrink: 0; }
+.step-row { display: flex; align-items: flex-start; margin-bottom: 24px; }
+.step-row .step-content { flex: 1; }
+.step-row .step-content h3 { margin-bottom: 4px; }
+.step-row .step-content p { font-size: clamp(14px, 1.4vw, 20px); }
+.tag { display: inline-block; background: #dbeafe; color: #1d4ed8; padding: 4px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+.result-item { background: #f0fdf4; border-radius: 12px; padding: 16px 20px; text-align: center; }
+.result-item .result-value { font-size: clamp(24px, 3vw, 40px); font-weight: 800; color: #2563EB; }
+.result-item .result-label { font-size: clamp(12px, 1.2vw, 16px); color: #64748b; margin-top: 4px; }
+.arrow-hint { font-size: clamp(14px, 1.2vw, 18px); color: #2563EB; font-weight: 700; margin-top: 16px; }
+.center-text { text-align: center; }
+.cover-slide { justify-content: center; align-items: center; text-align: center; background: linear-gradient(135deg, #eff6ff 0%, #fff 50%, #f0fdf4 100%); }
+.cover-slide h1 { font-size: clamp(30px, 4.5vw, 64px); max-width: 900px; }
+.cover-slide .subtitle { font-size: clamp(16px, 2vw, 28px); max-width: 700px; }
+.end-slide { justify-content: center; align-items: center; text-align: center; background: linear-gradient(135deg, #eff6ff 0%, #fff 50%, #f0fdf4 100%); }
+.bar-chart { display: flex; align-items: flex-end; gap: 40px; justify-content: center; margin: 24px 0; height: 200px; }
+.bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.bar-fill { width: 80px; border-radius: 8px 8px 0 0; transition: height 0.5s; }
+.bar-label { margin-top: 8px; font-size: clamp(12px, 1.2vw, 16px); color: #64748b; text-align: center; }
+.bar-value { font-size: clamp(16px, 1.8vw, 24px); font-weight: 800; margin-bottom: 4px; }
+.cta-box { background: linear-gradient(135deg, #2563EB, #1d4ed8); color: #fff; border-radius: 20px; padding: 40px; text-align: center; margin: 20px 0; }
+.cta-box h2 { color: #fff; }
+.cta-box p { color: #dbeafe; }
+.cta-box .big-number { color: #fff; }
+.not-list li::before { background: #ef4444; }
+@media (max-width: 768px) {
+  .slide { padding: 32px 28px; }
+  .grid-2, .grid-3, .result-grid { grid-template-columns: 1fr; }
+  .bar-chart { gap: 20px; }
+  .bar-fill { width: 50px; }
+}
+</style>
+</head>
+<body>
+
+<div class="slide-container">
+
+<!-- Slide 1: Cover -->
+<div class="slide cover-slide" id="slide-1">
+  <div class="tag">AI活用セミナー</div>
+  <h1>年商数億の会社が<br>AIで<span class="accent">月40時間</span>削減した方法</h1>
+  <p class="subtitle">30分でわかるAI活用の第一歩</p>
+</div>
+
+<!-- Slide 2: Today's Goal -->
+<div class="slide" id="slide-2">
+  <h2>本日のゴール</h2>
+  <div class="highlight-box">
+    <p>30分後、あなたは「自社でAIをどう使うか」のイメージを持って帰れます</p>
+  </div>
+  <h3 style="margin-top:24px;">今日お話しすること</h3>
+  <ol>
+    <li>中小企業のAI活用、今どうなっている？</li>
+    <li>実際にAIで成果を出した<strong>3社の事例</strong></li>
+    <li>明日からできる<strong>最初の一歩</strong></li>
+  </ol>
+  <h3 style="margin-top:24px;">今日お話ししないこと</h3>
+  <ul class="not-list">
+    <li>難しい技術の話</li>
+    <li>大企業にしかできない話</li>
+    <li>「AIにすべて任せましょう」という話</li>
+  </ul>
+</div>
+
+<!-- Slide 3: Self Introduction -->
+<div class="slide" id="slide-3" style="align-items:center; text-align:center;">
+  <h2>自己紹介</h2>
+  <div class="highlight-box" style="max-width:800px; margin:32px auto;">
+    <p style="font-size:clamp(18px, 2.2vw, 32px);">私たちのミッション</p>
+    <p style="font-size:clamp(20px, 2.8vw, 40px); margin-top:16px; color:#2563EB;">「AIの専門家がいない会社でも、<br>AIの恩恵を受けられるようにする」</p>
+  </div>
+</div>
+
+<!-- Slide 4: Question -->
+<div class="slide" id="slide-4">
+  <h2>質問です</h2>
+  <p style="margin-bottom:24px;">あなたの会社で、こんなことはありませんか？</p>
+  <ul>
+    <li>毎月同じ書類を<strong>手作業</strong>で作っている</li>
+    <li>ベテラン社員の<strong>頭の中にしかない</strong>ノウハウがある</li>
+    <li>「この作業、なんとかならないかな」と思う業務がある</li>
+    <li>人を<strong>採用したい</strong>が、なかなか見つからない</li>
+  </ul>
+</div>
+
+<!-- Slide 5: AI Adoption Reality -->
+<div class="slide" id="slide-5" style="align-items:center; text-align:center;">
+  <h2>中小企業のAI導入、現実は？</h2>
+  <p style="margin-bottom:16px;">中小企業のAI全社導入率</p>
+  <div class="big-number">わずか 1.3%</div>
+  <div class="bar-chart" style="margin-top:32px;">
+    <div class="bar">
+      <div class="bar-value accent">約35%</div>
+      <div class="bar-fill" style="height:175px; background:#2563EB;"></div>
+      <div class="bar-label">大企業</div>
+    </div>
+    <div class="bar">
+      <div class="bar-value" style="color:#ef4444;">1.3%</div>
+      <div class="bar-fill" style="height:10px; background:#ef4444;"></div>
+      <div class="bar-label">中小企業<br>(全社導入)</div>
+    </div>
+    <div class="bar">
+      <div class="bar-value" style="color:#f59e0b;">約9%</div>
+      <div class="bar-fill" style="height:45px; background:#f59e0b;"></div>
+      <div class="bar-label">中小企業<br>(部分導入含む)</div>
+    </div>
+  </div>
+  <p class="arrow-hint" style="margin-top:24px;">90%以上の中小企業はまだAIを使っていない</p>
+</div>
+
+<!-- Slide 6: Why Not Adopted -->
+<div class="slide" id="slide-6">
+  <h2>なぜ導入が進まないのか？</h2>
+  <div style="margin:24px 0;">
+    <div style="display:flex; align-items:center; margin-bottom:20px;">
+      <span class="step-number">1</span>
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:clamp(16px,1.8vw,24px); font-weight:600; color:#334155;">専門人材がいない</span>
+          <span style="font-size:clamp(20px,2.5vw,36px); font-weight:900; color:#2563EB;">55%</span>
+        </div>
+        <div style="background:#e2e8f0; border-radius:8px; height:16px; margin-top:8px;"><div style="background:#2563EB; border-radius:8px; height:100%; width:55%;"></div></div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; margin-bottom:20px;">
+      <span class="step-number">2</span>
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:clamp(16px,1.8vw,24px); font-weight:600; color:#334155;">何に使えるかわからない</span>
+          <span style="font-size:clamp(20px,2.5vw,36px); font-weight:900; color:#2563EB;">44%</span>
+        </div>
+        <div style="background:#e2e8f0; border-radius:8px; height:16px; margin-top:8px;"><div style="background:#f59e0b; border-radius:8px; height:100%; width:44%;"></div></div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; margin-bottom:20px;">
+      <span class="step-number">3</span>
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:clamp(16px,1.8vw,24px); font-weight:600; color:#334155;">コストが見合うか不安</span>
+          <span style="font-size:clamp(20px,2.5vw,36px); font-weight:900; color:#2563EB;">38%</span>
+        </div>
+        <div style="background:#e2e8f0; border-radius:8px; height:16px; margin-top:8px;"><div style="background:#10b981; border-radius:8px; height:100%; width:38%;"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="highlight-box">
+    <p>今日のセミナーで、<span style="color:#2563EB; font-size:clamp(18px,2vw,28px);">2番目の壁</span>を壊します。</p>
+  </div>
+</div>
+
+<!-- Slide 7: Risk of Not Using AI -->
+<div class="slide" id="slide-7">
+  <h2>AIを使わないリスク</h2>
+  <ul>
+    <li>人件費は年々上昇（最低賃金10年で<strong class="accent">約30%上昇</strong>）</li>
+    <li>採用難は加速（中小企業の人手不足倒産、<strong class="accent">過去最多更新中</strong>）</li>
+    <li>競合が先にAI導入したら？ コスト差で負ける</li>
+  </ul>
+  <div class="highlight-box" style="margin-top:32px;">
+    <p>AIは「攻め」のツールではなく<br><span style="font-size:clamp(20px,2.5vw,36px); color:#2563EB;">「守り」のインフラ</span>になりつつある</p>
+  </div>
+</div>
+
+<!-- Slide 8: Case Studies Intro -->
+<div class="slide" id="slide-8">
+  <h2>実際にAIで成果を出した<span class="accent">3社</span>を紹介</h2>
+  <table>
+    <thead>
+      <tr><th>業種</th><th>規模</th><th>年商</th><th>AI活用領域</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>製造業（金属加工）</td><td>30名</td><td>8億円</td><td>検品・品質管理</td></tr>
+      <tr><td>小売業（アパレルEC）</td><td>25名</td><td>5億円</td><td>需要予測・在庫管理</td></tr>
+      <tr><td>サービス業（税理士法人）</td><td>15名</td><td>2億円</td><td>書類作成・データ入力</td></tr>
+    </tbody>
+  </table>
+  <div class="highlight-box" style="margin-top:24px;">
+    <p>全て「AIの専門家がいない」状態からスタート</p>
+  </div>
+</div>
+
+<!-- Slide 9: Case 1 Problem -->
+<div class="slide" id="slide-9">
+  <div class="tag">事例 1 / 製造業</div>
+  <h2>A社：金属加工業<span class="subtitle" style="display:inline; margin-left:12px;">埼玉県・30名・年商8億</span></h2>
+  <ul>
+    <li>目視検品に熟練作業員が<strong class="accent">1日4時間</strong></li>
+    <li>ベテラン検査員の退職が迫る</li>
+    <li>不良品見落としクレーム<strong class="accent">年間15件</strong></li>
+  </ul>
+  <div class="quote-box" style="margin-top:24px;">
+    <p>「検査のベテランが来年定年...若い子が同じレベルになるのに5年はかかる」</p>
+  </div>
+</div>
+
+<!-- Slide 10: Case 1 Result -->
+<div class="slide" id="slide-10">
+  <div class="tag">事例 1 / 製造業 - 成果</div>
+  <h2>A社の成果</h2>
+  <p>検品画像<strong>5,000枚</strong>をAIに学習、リアルタイム判定 / 導入期間：<strong>約2ヶ月</strong></p>
+  <div class="result-grid" style="margin-top:24px;">
+    <div class="result-item">
+      <div class="result-value">98.5%</div>
+      <div class="result-label">検出精度</div>
+    </div>
+    <div class="result-item">
+      <div class="result-value">月60時間削減</div>
+      <div class="result-label">検品時間 4時間 → 1時間/日</div>
+    </div>
+    <div class="result-item">
+      <div class="result-value">15件 → 2件</div>
+      <div class="result-label">年間クレーム数</div>
+    </div>
+    <div class="result-item">
+      <div class="result-value">8ヶ月で回収</div>
+      <div class="result-label">初期投資 約150万円</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11: Case 2 Problem -->
+<div class="slide" id="slide-11">
+  <div class="tag">事例 2 / 小売業</div>
+  <h2>B社：アパレルEC<span class="subtitle" style="display:inline; margin-left:12px;">東京都・25名・年商5億</span></h2>
+  <ul>
+    <li>仕入れ量を<strong>「勘と経験」</strong>で決定</li>
+    <li>売れ残り在庫：原価ベース<strong class="accent">約800万円/シーズン</strong></li>
+    <li>人気商品は欠品、機会損失大</li>
+  </ul>
+  <div class="quote-box" style="margin-top:24px;">
+    <p>「在庫が余って値引きか、足りなくて売り逃すか。毎シーズンこの繰り返し」</p>
+  </div>
+</div>
+
+<!-- Slide 12: Case 2 Result -->
+<div class="slide" id="slide-12">
+  <div class="tag">事例 2 / 小売業 - 成果</div>
+  <h2>B社の成果</h2>
+  <p>3年分の販売・気象・SNSデータをAI分析 / 需要予測を自動算出 / 導入期間：<strong>約1.5ヶ月</strong></p>
+  <div class="result-grid" style="margin-top:24px;">
+    <div class="result-item">
+      <div class="result-value">1.5倍</div>
+      <div class="result-label">在庫回転率</div>
+    </div>
+    <div class="result-item">
+      <div class="result-value">62%削減</div>
+      <div class="result-label">売れ残り 800万 → 300万</div>
+    </div>
+    <div class="result-item">
+      <div class="result-value">年600万円</div>
+      <div class="result-label">機会損失回復</div>
+    </div>
+    <div class="result-item">
+      <div class="result-value">4ヶ月で回収</div>
+      <div class="result-label">初期投資 約120万円</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 13: Case 3 Problem -->
+<div class="slide" id="slide-13">
+  <div class="tag">事例 3 / サービス業</div>
+  <h2>C社：税理士法人<span class="subtitle" style="display:inline; margin-left:12px;">大阪府・15名・年商2億</span></h2>
+  <ul>
+    <li>月次報告書 1社2時間 x 80社 = <strong class="accent">月160時間</strong></li>
+    <li>データ入力ミス<strong class="accent">月10件以上</strong></li>
+    <li>顧問先への提案に時間が割けない</li>
+  </ul>
+  <div class="quote-box" style="margin-top:24px;">
+    <p>「お客様にもっと良い提案をしたいのに、作業に追われて時間がない」</p>
+  </div>
+</div>
+
+<!-- Slide 14: Case 3 Result -->
+<div class="slide" id="slide-14">
+  <div class="tag">事例 3 / サービス業 - 成果</div>
+  <h2>C社の成果</h2>
+  <p>OCR + AI自動仕訳、報告書ドラフト自動生成 / 「確認・修正」ワークフローに変更 / 導入期間：<strong>約1ヶ月</strong></p>
+  <div class="result-grid" style="margin-top:24px;">
+    <div class="result-item">
+      <div class="result-value">月120時間削減</div>
+      <div class="result-label">報告書作成 2時間 → 30分/社</div>
+    </div>
+    <div class="result-item">
+      <div class="result-value">ほぼゼロ</div>
+      <div class="result-label">入力ミス</div>
+    </div>
+    <div class="result-item">
+      <div class="result-value">平均15%UP</div>
+      <div class="result-label">顧問料単価</div>
+    </div>
+    <div class="result-item">
+      <div class="result-value">3ヶ月で回収</div>
+      <div class="result-label">初期投資 約80万円</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 15: Common Points -->
+<div class="slide" id="slide-15">
+  <h2>3社に共通するポイント</h2>
+  <p style="margin-bottom:28px;">成功した会社に共通する3つのこと</p>
+  <div class="step-row">
+    <span class="step-number">1</span>
+    <div class="step-content">
+      <h3>「小さく始めた」</h3>
+      <p>全社一斉ではなく、<strong>1つの業務</strong>から</p>
+    </div>
+  </div>
+  <div class="step-row">
+    <span class="step-number">2</span>
+    <div class="step-content">
+      <h3>「完璧を求めなかった」</h3>
+      <p><strong>80点</strong>でスタート</p>
+    </div>
+  </div>
+  <div class="step-row">
+    <span class="step-number">3</span>
+    <div class="step-content">
+      <h3>「専門家の力を借りた」</h3>
+      <p>自力で全部やろうとしなかった</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 16: 3 Steps -->
+<div class="slide" id="slide-16">
+  <h2>明日からできる<span class="accent">3ステップ</span></h2>
+  <div class="grid-3" style="margin-top:16px;">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px; font-weight:900; color:#2563EB; margin-bottom:8px;">STEP 1</div>
+      <h3>「時間泥棒」を見つける</h3>
+      <p style="font-size:clamp(14px,1.3vw,18px);">毎月繰り返す手作業を<br>リストアップ</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px; font-weight:900; color:#2563EB; margin-bottom:8px;">STEP 2</div>
+      <h3>「小さく試す」</h3>
+      <p style="font-size:clamp(14px,1.3vw,18px);">無料ツールで<br>試してみる</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px; font-weight:900; color:#2563EB; margin-bottom:8px;">STEP 3</div>
+      <h3>「専門家に相談する」</h3>
+      <p style="font-size:clamp(14px,1.3vw,18px);">プロに<br>診断してもらう</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 17: Free Diagnosis -->
+<div class="slide" id="slide-17">
+  <div class="tag">セミナー参加者限定</div>
+  <h2>無料AI活用診断のご案内</h2>
+  <div class="grid-2">
+    <div>
+      <ul>
+        <li>オンライン面談<strong class="accent">30分</strong></li>
+        <li><strong class="accent">完全無料</strong>（通常5万円相当）</li>
+        <li>AI活用提案レポートを後日お送り</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>診断でわかること</h3>
+      <ul>
+        <li>最もAI効果が高い業務</li>
+        <li>削減時間・コスト概算</li>
+        <li>導入ロードマップ</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 18: How to Apply -->
+<div class="slide" id="slide-18" style="align-items:center; text-align:center;">
+  <h2>お申込み方法</h2>
+  <div class="cta-box" style="max-width:700px;">
+    <h2 style="font-size:clamp(24px,3vw,44px);">チャットのURLから<br>お申込みください</h2>
+    <div style="margin-top:24px; display:flex; justify-content:center; gap:32px; flex-wrap:wrap;">
+      <div>
+        <div style="font-size:clamp(14px,1.2vw,18px); color:#93c5fd;">所要時間</div>
+        <div style="font-size:clamp(24px,3vw,40px); font-weight:900;">1分</div>
+      </div>
+      <div>
+        <div style="font-size:clamp(14px,1.2vw,18px); color:#93c5fd;">日程調整連絡</div>
+        <div style="font-size:clamp(24px,3vw,40px); font-weight:900;">24時間以内</div>
+      </div>
+      <div>
+        <div style="font-size:clamp(14px,1.2vw,18px); color:#93c5fd;">毎月</div>
+        <div style="font-size:clamp(24px,3vw,40px); font-weight:900;">先着20社</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 19: Q&A -->
+<div class="slide" id="slide-19">
+  <h2>Q&A タイム</h2>
+  <h3 style="margin-top:24px;">よくある質問</h3>
+  <div style="margin-top:16px;">
+    <div class="highlight-box" style="margin-bottom:16px;">
+      <p style="font-weight:400;"><strong>Q.「うちの業種でも使える？」</strong><br>A. 繰り返し作業がある限り、活用可能です。</p>
+    </div>
+    <div class="highlight-box" style="margin-bottom:16px;">
+      <p style="font-weight:400;"><strong>Q.「ITスキル低くても大丈夫？」</strong><br>A. 3社とも特別なスキルは不要でした。</p>
+    </div>
+    <div class="highlight-box">
+      <p style="font-weight:400;"><strong>Q.「費用は？」</strong><br>A. 無料診断で概算をお出しします。</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 20: Thank You -->
+<div class="slide end-slide" id="slide-20">
+  <h2>ありがとうございました</h2>
+  <div style="text-align:left; max-width:700px; margin:24px auto 0;">
+    <h3>まとめ</h3>
+    <div class="step-row">
+      <span class="step-number">1</span>
+      <div class="step-content">
+        <p>中小企業のAI導入率は<strong class="accent">1.3%</strong>。今始めた人が勝つ</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-number">2</span>
+      <div class="step-content">
+        <p>専門家がいなくても、<strong>小さく始めれば</strong>成果は出る</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-number">3</span>
+      <div class="step-content">
+        <p>まずは「自社でどこにAIが使えるか」を知ることが第一歩</p>
+      </div>
+    </div>
+  </div>
+  <p class="arrow-hint" style="margin-top:32px; font-size:clamp(18px,2.2vw,30px);">無料AI活用診断にお申込みください</p>
+</div>
+
+</div><!-- end slide-container -->
+
+<div class="slide-number" id="slide-counter">1 / 20</div>
+
+<script>
+(function() {
+  var slides = document.querySelectorAll('.slide');
+  var counter = document.getElementById('slide-counter');
+  var current = 0;
+  var total = slides.length;
+
+  function showSlide(n) {
+    if (n < 0 || n >= total) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    counter.textContent = (current + 1) + ' / ' + total;
+  }
+
+  showSlide(0);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      showSlide(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      showSlide(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      showSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      showSlide(total - 1);
+    }
+  });
+
+  // Touch support
+  var touchStartX = 0;
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+  document.addEventListener('touchend', function(e) {
+    var diff = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(diff) > 50) {
+      if (diff < 0) showSlide(current + 1);
+      else showSlide(current - 1);
+    }
+  });
+
+  // Click to advance
+  document.addEventListener('click', function(e) {
+    if (e.clientX > window.innerWidth / 2) showSlide(current + 1);
+    else showSlide(current - 1);
+  });
+})();
+</script>
+</body>
+</html>
