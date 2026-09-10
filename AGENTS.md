@@ -2,6 +2,7 @@
 
 このプロジェクトは、AIによって運営される会社「AI Company」のマネジメントの場である。
 Cursor では **AGENTS.md**（本ファイル）と **`.cursor/agents/`** で組織を定義している。
+会社の全体構想・運営サイクルは `governance/ai-company-concept.md`（AI Company構想書）を正とする。
 
 ---
 

@@ -1,6 +1,7 @@
 # AI Company運用ガイド
 
 このプロジェクトは、AIによって運営される会社「AI Company」のマネジメントの場である。
+会社の全体構想・運営サイクルは `governance/ai-company-concept.md`（AI Company構想書）を正とする。
 
 ## 体制
 - **オーナー / 取締役会**: BIORA — 最終承認権を持つ。重要な意思決定の承認のみ行い、実務には介入しない（[[governance/rules.md]] Rule #002）。
