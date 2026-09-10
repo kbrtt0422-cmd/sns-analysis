@@ -1,17 +1,18 @@
 <title>AI Company バーチャルオフィス</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Shippori+Mincho:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Cormorant+Garamond:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root{
-    --ink:#2B2118; --ink-soft:#6B5B49;
-    --panel:#FCF7EC; --panel-brd:#E4D8C2; --panel-dark:#1B140E; --panel-dark-ink:#F3E9D6;
-    --accent:#C94F32; --ok:#5FA173; --warn:#C98A2E;
-    --sns:#D96C8E; --sales:#4F7FBF; --acct:#5FA173; --ceo:#C9A24B; --cmo:#E0719B; --cto:#4F8FA8; --human:#8B8B8B;
+    --ink:#4A3A42; --ink-soft:#9A8791;
+    --panel:#FFFFFF; --panel-brd:#F2DCE4; --cream:#FBF5EF;
+    --accent:#E85E8A; --gold:#C9A24B; --ok:#4A9A66; --warn:#B07A1E;
+    --sns:#E86A96; --sales:#7FA6D9; --acct:#7FBF98; --ceo:#C9A24B; --cmo:#E85E8A; --cto:#6FA8BF; --human:#A099A5;
     --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --serif:'Cormorant Garamond',serif;
   }
   html,body{height:100%}
   body{
-    margin:0; background:#E8D9B5; color:var(--ink);
-    font-family:'Zen Kaku Gothic New',"Hiragino Kaku Gothic ProN",sans-serif;
+    margin:0; background:#FBEDF0; color:var(--ink);
+    font-family:'Zen Maru Gothic',"Hiragino Maru Gothic ProN",sans-serif;
     overflow:hidden; font-size:14px;
   }
   #scene{position:fixed; inset:0; display:block; touch-action:none; cursor:grab}
@@ -22,14 +23,14 @@
 
   .chip{
     display:inline-flex; align-items:center; gap:7px;
-    background:var(--panel); border:1px solid var(--panel-brd); border-radius:10px;
-    padding:7px 12px; box-shadow:0 2px 10px rgba(60,40,10,.12); font-weight:500;
+    background:var(--panel); border:1px solid var(--panel-brd); border-radius:14px;
+    padding:7px 13px; box-shadow:0 4px 14px rgba(230,120,150,.18); font-weight:500;
   }
   .dot{width:8px;height:8px;border-radius:50%;flex:none}
 
   /* 左上: 社名 */
   .brand{position:absolute; top:16px; left:16px; display:flex; gap:8px; flex-wrap:wrap; max-width:calc(100vw - 32px)}
-  .brand .name{font-weight:700; letter-spacing:.02em}
+  .brand .name{font-family:var(--serif); font-weight:600; font-size:16px; letter-spacing:.09em; color:var(--ink)}
   .brand .sub{font-size:12px; color:var(--ink-soft)}
   .agent-status{font-size:12px; color:var(--ink-soft)}
   .agent-status b{color:var(--ink); font-weight:700}
@@ -37,19 +38,19 @@
   /* 中央上: パイプライン */
   .pipeline{position:absolute; top:16px; left:50%; transform:translateX(-50%);
     display:flex; gap:2px; background:var(--panel); border:1px solid var(--panel-brd);
-    border-radius:12px; padding:5px; box-shadow:0 2px 10px rgba(60,40,10,.12)}
-  .stage{padding:5px 12px; border-radius:8px; font-size:12.5px; font-weight:500; color:var(--ink-soft); white-space:nowrap}
+    border-radius:16px; padding:5px; box-shadow:0 4px 14px rgba(230,120,150,.18)}
+  .stage{padding:5px 13px; border-radius:12px; font-size:12.5px; font-weight:500; color:var(--ink-soft); white-space:nowrap}
   .stage.done{color:var(--ok)}
-  .stage.active{background:var(--ink); color:var(--panel-dark-ink); font-weight:700}
-  .stage .n{opacity:.55; margin-right:3px; font-family:var(--mono); font-size:11px}
+  .stage.active{background:var(--accent); color:#fff; font-weight:700}
+  .stage .n{opacity:.6; margin-right:3px; font-family:var(--mono); font-size:11px}
 
   /* 右上: 操作 */
   .controls{position:absolute; top:16px; right:16px; display:flex; gap:8px}
   button.chip{cursor:pointer; font:inherit; color:var(--ink); font-weight:500}
-  button.chip:hover{border-color:var(--ink-soft)}
+  button.chip:hover{border-color:var(--accent)}
   button.chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-  button.chip[aria-pressed="true"]{background:var(--ink); color:var(--panel-dark-ink); border-color:var(--ink)}
-  .live{color:var(--accent); font-weight:700; letter-spacing:.06em}
+  button.chip[aria-pressed="true"]{background:var(--accent); color:#fff; border-color:var(--accent)}
+  .live{color:var(--accent); font-weight:700; letter-spacing:.1em; font-family:var(--serif); font-size:15px}
   .live .dot{background:var(--accent)}
   @media (prefers-reduced-motion:no-preference){
     .live .dot{animation:pulse 1.6s infinite}
@@ -58,48 +59,48 @@
 
   /* 業務ボード */
   .board{position:absolute; top:64px; left:50%; transform:translateX(-50%);
-    width:400px; max-width:calc(100vw - 32px);
-    background:var(--panel-dark); color:var(--panel-dark-ink);
-    border-radius:12px; border:1px solid #3A2C1E; box-shadow:0 8px 28px rgba(30,18,5,.35);
-    overflow:hidden}
-  .board h2{margin:0; padding:9px 14px; font-size:12px; font-weight:700; letter-spacing:.14em;
-    border-bottom:1px solid #3A2C1E; display:flex; justify-content:space-between; align-items:center}
-  .board h2 .cnt{font-family:var(--mono); font-weight:400; opacity:.6; letter-spacing:0}
+    width:404px; max-width:calc(100vw - 32px);
+    background:var(--panel); border:1px solid var(--panel-brd);
+    border-radius:16px; box-shadow:0 10px 30px rgba(220,110,145,.22); overflow:hidden}
+  .board h2{margin:0; padding:10px 16px 8px; font-size:12px; font-weight:700; letter-spacing:.14em;
+    display:flex; justify-content:space-between; align-items:center; color:var(--ink);
+    border-bottom:2px solid #FAE3EA}
+  .board h2 .cnt{font-family:var(--mono); font-weight:400; color:var(--ink-soft); letter-spacing:0}
   .board ul{list-style:none; margin:0; padding:6px 0}
-  .board li{display:flex; align-items:center; gap:9px; padding:5px 14px; font-size:12.5px}
-  .board .who{opacity:.65; font-size:11.5px; flex:none; width:6em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .board li{display:flex; align-items:center; gap:9px; padding:5px 16px; font-size:12.5px}
+  .board .who{color:var(--ink-soft); font-size:11.5px; flex:none; width:6em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .board .task{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  .board .st{flex:none; font-size:11px; padding:2px 8px; border-radius:99px; border:1px solid transparent}
-  .st-0{color:#B8A88F; border-color:#4A3A28}
-  .st-1{color:#F0C36A; border-color:#7A5C22; background:rgba(240,195,106,.08)}
-  .st-2{color:#8FC7F0; border-color:#2F5A7A; background:rgba(143,199,240,.08)}
-  .st-3{color:#8FD9A0; border-color:#2F6A3E; background:rgba(143,217,160,.08)}
+  .board .st{flex:none; font-size:11px; padding:2px 9px; border-radius:99px; font-weight:700}
+  .st-0{color:#9A8791; background:#F5EFF1}
+  .st-1{color:var(--warn); background:#FBF0DA}
+  .st-2{color:#4A7AB0; background:#E7F0FA}
+  .st-3{color:var(--ok); background:#E5F5EA}
 
   /* 成果物モニター */
-  .monitor{position:absolute; top:64px; right:16px; width:300px; max-width:calc(100vw - 32px);
-    background:var(--panel); border:1px solid var(--panel-brd); border-radius:12px;
-    box-shadow:0 4px 18px rgba(60,40,10,.18); overflow:hidden}
-  .monitor h2{margin:0; padding:9px 12px; font-size:12px; font-weight:700; letter-spacing:.1em;
-    display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--panel-brd)}
+  .monitor{position:absolute; top:64px; right:16px; width:302px; max-width:calc(100vw - 32px);
+    background:var(--panel); border:1px solid var(--panel-brd); border-radius:16px;
+    box-shadow:0 10px 30px rgba(220,110,145,.22); overflow:hidden}
+  .monitor h2{margin:0; padding:10px 14px 8px; font-size:12px; font-weight:700; letter-spacing:.12em;
+    display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #FAE3EA}
   .monitor h2 .cnt{font-family:var(--mono); font-weight:400; color:var(--ink-soft)}
-  .doc{margin:10px 12px 8px; background:#fff; border:1px solid var(--panel-brd); border-radius:8px;
-    padding:10px 12px; min-height:118px}
+  .doc{margin:10px 12px 8px; background:var(--cream); border:1px solid #F4E4D8; border-radius:12px;
+    padding:10px 13px; min-height:118px}
   .doc .t{font-weight:700; font-size:12.5px; margin-bottom:6px; text-align:center}
   .doc .l{font-family:var(--mono); font-size:10.5px; color:var(--ink-soft); line-height:1.75;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .doc .l b{color:var(--ink); font-weight:500}
   .files{display:flex; flex-wrap:wrap; gap:5px; padding:2px 12px 12px}
-  .file{font-family:var(--mono); font-size:10px; padding:3px 7px; border-radius:6px;
-    background:#F1E8D6; border:1px solid var(--panel-brd); color:var(--ink-soft);
+  .file{font-family:var(--mono); font-size:10px; padding:3px 8px; border-radius:99px;
+    background:#FAEDF1; border:1px solid var(--panel-brd); color:var(--ink-soft);
     transition:background .4s,color .4s,border-color .4s}
-  .file.hot{background:var(--ink); color:var(--panel-dark-ink); border-color:var(--ink)}
+  .file.hot{background:var(--accent); color:#fff; border-color:var(--accent)}
 
   /* 活動ログ */
   .log{position:absolute; left:16px; bottom:16px; width:330px; max-width:calc(100vw - 32px);
     display:flex; flex-direction:column-reverse; gap:5px}
   .log .e{display:flex; align-items:baseline; gap:8px; background:var(--panel);
-    border:1px solid var(--panel-brd); border-radius:9px; padding:6px 11px; font-size:12px;
-    box-shadow:0 2px 8px rgba(60,40,10,.10)}
+    border:1px solid var(--panel-brd); border-radius:12px; padding:6px 12px; font-size:12px;
+    box-shadow:0 3px 10px rgba(230,120,150,.14)}
   .log .e .dot{align-self:center}
   .log .e .who{font-weight:700; flex:none}
   .log .e .what{color:var(--ink-soft); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -108,33 +109,31 @@
   .log .e:nth-child(n+6){opacity:.3}
 
   /* 取締役会の間 */
-  .throne{position:absolute; right:16px; bottom:16px; width:300px; max-width:calc(100vw - 32px);
-    background:var(--panel); border:1px solid var(--panel-brd); border-radius:12px;
-    box-shadow:0 4px 18px rgba(60,40,10,.18)}
-  .throne h2{margin:0; padding:9px 12px; font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:8px}
-  .throne h2 .seal{width:16px;height:16px;border-radius:4px;background:var(--accent);flex:none;
+  .throne{position:absolute; right:16px; bottom:16px; width:302px; max-width:calc(100vw - 32px);
+    background:var(--panel); border:1px solid var(--panel-brd); border-radius:16px;
+    box-shadow:0 10px 30px rgba(220,110,145,.22)}
+  .throne h2{margin:0; padding:10px 14px; font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:8px}
+  .throne h2 .seal{width:17px;height:17px;border-radius:50%;background:var(--gold);flex:none;
     color:#fff;font-size:10px;display:grid;place-items:center;font-weight:700}
-  .throne .body{border-top:1px solid var(--panel-brd); padding:9px 12px; font-size:12px; color:var(--ink-soft)}
+  .throne .body{border-top:2px solid #FAE3EA; padding:9px 14px; font-size:12px; color:var(--ink-soft)}
   .throne .row{display:flex; justify-content:space-between; gap:10px; padding:3px 0}
   .throne .ok{color:var(--ok); font-weight:700; flex:none}
   .throne .wait{color:var(--warn); font-weight:700; flex:none}
-  .throne .foot{display:flex; gap:7px; padding:0 12px 11px}
-  .throne .foot .chip{padding:5px 11px; font-size:12px; box-shadow:none}
+  .throne .foot{display:flex; gap:7px; padding:0 14px 12px}
+  .throne .foot .chip{padding:5px 12px; font-size:12px; box-shadow:none}
 
   /* 吹き出し */
   .bubbles{position:absolute; inset:0; overflow:hidden; pointer-events:none}
   .bub{position:absolute; transform:translate(-50%,-100%); max-width:230px;
-    background:#fff; border:1.5px solid var(--ink); border-radius:11px;
-    padding:6px 11px 7px; font-size:12.5px; line-height:1.45;
-    box-shadow:0 3px 10px rgba(60,40,10,.2); white-space:normal}
+    background:#fff; border:1.5px solid #F0C3D2; border-radius:14px;
+    padding:6px 12px 7px; font-size:12.5px; line-height:1.45;
+    box-shadow:0 5px 16px rgba(220,110,145,.25); white-space:normal}
   .bub::after{content:""; position:absolute; left:50%; bottom:-7px; transform:translateX(-50%) rotate(45deg);
-    width:11px; height:11px; background:#fff; border-right:1.5px solid var(--ink); border-bottom:1.5px solid var(--ink)}
+    width:11px; height:11px; background:#fff; border-right:1.5px solid #F0C3D2; border-bottom:1.5px solid #F0C3D2}
   .bub .n{display:block; font-size:10px; font-weight:700; margin-bottom:1px}
   .bub.think{border-style:dashed; color:var(--ink-soft)}
   .bub.think::after{border-style:dashed}
 
-  /* パネル開閉（モバイル） */
-  .panel-toggles{position:absolute; top:64px; left:16px; display:none; gap:8px}
   @media (max-width:860px){
     .board{left:16px; transform:none; width:auto; right:16px; top:110px}
     .monitor{top:auto; bottom:76px; right:16px; width:auto; left:16px}
@@ -151,8 +150,8 @@
 
 <div class="hud">
   <div class="brand">
-    <span class="chip"><span class="dot" style="background:var(--ceo)"></span>
-      <span><span class="name">AI Company</span> <span class="sub">第1幕・Tiaful立ち上げ</span></span></span>
+    <span class="chip"><span class="dot" style="background:var(--gold)"></span>
+      <span><span class="name">AI COMPANY</span> <span class="sub">第1幕・Tiaful立ち上げ</span></span></span>
     <span class="chip agent-status" id="focusline"><span class="dot" style="background:var(--cmo)"></span><span>Sara（CMO）<b>指示中</b></span></span>
   </div>
 
@@ -205,7 +204,7 @@
 <script>
 'use strict';
 /* ===== 会社データ（すべて実在の体制・タスク・成果物に基づく） ===== */
-const DEPT_COLOR = {exec:'#C9A24B', cmo:'#E0719B', cto:'#4F8FA8', sns:'#D96C8E', sales:'#4F7FBF', acct:'#5FA173', human:'#8B8B8B'};
+const DEPT_COLOR = {exec:'#C9A24B', cmo:'#E85E8A', cto:'#6FA8BF', sns:'#E86A96', sales:'#7FA6D9', acct:'#7FBF98', human:'#A099A5'};
 const AGENTS = [
   {id:'jobs', name:'Jobs', role:'CEO', dept:'exec', hair:'#3A3A3A',
     lines:['「やりました」ではなく「ここにあります」で頼む','数字はどこ？感覚では判断しない','検収は妥協しない']},
@@ -288,148 +287,245 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#F3C288');
-scene.fog = new THREE.Fog('#F3C288', 40, 90);
+scene.background = new THREE.Color('#FBEDF0');
+scene.fog = new THREE.Fog('#FBEDF0', 48, 100);
 
 const camera = new THREE.PerspectiveCamera(42, 1, .1, 200);
-const camTarget = new THREE.Vector3(0, 1.1, 1.5);
-let camTheta = 0, camPhi = 1.02, camR = 23.5;
+const camTarget = new THREE.Vector3(0, 1.2, 1.5);
+let camTheta = 0, camPhi = 1.2, camR = 25;
 
-scene.add(new THREE.HemisphereLight('#FFF3DC', '#B08A5A', .95));
-const sun = new THREE.DirectionalLight('#FFE1B0', .85);
-sun.position.set(-9, 14, 8);
+scene.add(new THREE.HemisphereLight('#FFF6F0', '#DEC3CB', 1.0));
+const sun = new THREE.DirectionalLight('#FFE9DC', .65);
+sun.position.set(-9, 15, 9);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, {left:-18, right:18, top:18, bottom:-14, far:50});
 scene.add(sun);
+const glow = new THREE.PointLight('#FFE2C9', .35, 26);
+glow.position.set(0, 8.5, -2);
+scene.add(glow);
 
-const M = (c, rough=.9) => new THREE.MeshStandardMaterial({color:c, roughness:rough});
+const M = (c, rough=.85) => new THREE.MeshStandardMaterial({color:c, roughness:rough});
 const box = (w,h,d,mat) => new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
 function cast(m){ m.castShadow = true; m.receiveShadow = true; return m; }
+const GOLD = new THREE.MeshStandardMaterial({color:'#D4B36A', roughness:.35, metalness:.65});
+const WHITE = M('#FDFCFA', .5);
 
-/* 床 */
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 46), M('#DCCBA4'));
+/* 床（アイボリーの艶床 + ラグ） */
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 46), M('#F6F1EB', .35));
 floor.rotation.x = -Math.PI/2; floor.receiveShadow = true;
 scene.add(floor);
-const rug = new THREE.Mesh(new THREE.CircleGeometry(3.1, 40), M('#CBB27F'));
-rug.rotation.x = -Math.PI/2; rug.position.set(0, .01, -6.2); rug.receiveShadow = true;
-scene.add(rug);
+function rug(x, z, r, color){
+  const m = new THREE.Mesh(new THREE.CircleGeometry(r, 42), M(color, .95));
+  m.rotation.x = -Math.PI/2; m.position.set(x, .012, z); m.receiveShadow = true;
+  scene.add(m);
+}
+rug(0, -6.2, 3.4, '#F2D5DC');       /* CEOラグ（ブラッシュピンク） */
+rug(-4.3, .8, 5.2, '#F7E8E0');      /* SNS部 */
+rug(0, 4.6, 5.2, '#EFEAF3');        /* 営業部 */
+rug(8.2, 1.8, 4.4, '#E9F1EA');      /* 経理部 */
 
-/* 背景の夕景スカイライン */
-(function skyline(){
+/* 背景の壁（クリーム × 金の縁 × アーチ窓） */
+const wallDraws = [];
+function texturedPlane(w, h, draw, pxw, pxh){
+  const c = document.createElement('canvas'); c.width = pxw; c.height = pxh;
+  draw(c.getContext('2d'), pxw, pxh);
+  const tex = new THREE.CanvasTexture(c);
+  wallDraws.push(()=>{ draw(c.getContext('2d'), pxw, pxh); tex.needsUpdate = true; });
+  return new THREE.Mesh(new THREE.PlaneGeometry(w, h),
+    new THREE.MeshBasicMaterial({map:tex, fog:false}));
+}
+function drawWall(x, W, H){
+  x.fillStyle = '#FAF3EC'; x.fillRect(0,0,W,H);
+  /* 腰壁 */
+  x.fillStyle = '#F3E4DA'; x.fillRect(0, H*.72, W, H*.28);
+  x.strokeStyle = '#D4B36A'; x.lineWidth = 6;
+  x.beginPath(); x.moveTo(0, H*.72); x.lineTo(W, H*.72); x.stroke();
+  /* アーチ窓 ×3（淡いピンクの空） */
+  const win = (cx)=>{
+    const ww = W*.16, wh = H*.5, top = H*.14;
+    const g = x.createLinearGradient(0, top, 0, top+wh);
+    g.addColorStop(0, '#FDE7EC'); g.addColorStop(1, '#F7CBD6');
+    x.fillStyle = g;
+    x.beginPath();
+    x.moveTo(cx-ww/2, top+wh);
+    x.lineTo(cx-ww/2, top+ww/2);
+    x.arc(cx, top+ww/2, ww/2, Math.PI, 0);
+    x.lineTo(cx+ww/2, top+wh);
+    x.closePath(); x.fill();
+    x.strokeStyle = '#FFFFFF'; x.lineWidth = 14; x.stroke();
+    x.strokeStyle = '#E8D9C9'; x.lineWidth = 3;
+    x.beginPath(); x.moveTo(cx, top+8); x.lineTo(cx, top+wh); x.stroke();
+  };
+  win(W*.2); win(W*.5); win(W*.8);
+  /* ワードマーク */
+  x.fillStyle = '#C9A24B';
+  x.font = "600 64px 'Cormorant Garamond', serif";
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.fillText('A I   C O M P A N Y', W*.5, H*.085);
+  x.strokeStyle = '#C9A24B'; x.lineWidth = 2;
+  x.beginPath(); x.moveTo(W*.42, H*.125); x.lineTo(W*.58, H*.125); x.stroke();
+}
+const backWall = texturedPlane(46, 13, drawWall, 2048, 580);
+backWall.position.set(0, 6.5, -15.5);
+scene.add(backWall);
+const sideWall = texturedPlane(40, 13, (x,W,H)=>{
+  x.fillStyle = '#FAF3EC'; x.fillRect(0,0,W,H);
+  x.fillStyle = '#F3E4DA'; x.fillRect(0, H*.72, W, H*.28);
+  x.strokeStyle = '#D4B36A'; x.lineWidth = 6;
+  x.beginPath(); x.moveTo(0, H*.72); x.lineTo(W, H*.72); x.stroke();
+}, 1024, 330);
+sideWall.rotation.y = Math.PI/2;
+sideWall.position.set(-16, 6.5, 2);
+scene.add(sideWall);
+
+/* シャンデリア */
+(function chandelier(){
   const g = new THREE.Group();
-  const c = document.createElement('canvas'); c.width = 1024; c.height = 256;
-  const x = c.getContext('2d');
-  const grad = x.createLinearGradient(0,0,0,256);
-  grad.addColorStop(0,'#F6CE93'); grad.addColorStop(1,'#EFA867');
-  x.fillStyle = grad; x.fillRect(0,0,1024,256);
-  x.fillStyle = 'rgba(150,95,50,.55)';
-  let px = 0;
-  while(px < 1024){
-    const w = 30+Math.random()*60, h = 40+Math.random()*130;
-    x.fillRect(px, 256-h, w, h);
-    px += w + 6+Math.random()*18;
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.5, .09, 10, 40), GOLD);
+  ring.rotation.x = Math.PI/2;
+  g.add(ring);
+  const bulb = new THREE.MeshBasicMaterial({color:'#FFF2DC'});
+  for(let i=0;i<8;i++){
+    const a = i/8*Math.PI*2;
+    const s = new THREE.Mesh(new THREE.SphereGeometry(.16, 10, 8), bulb);
+    s.position.set(Math.cos(a)*1.5, -.18, Math.sin(a)*1.5);
+    g.add(s);
   }
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(60, 15),
-    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c), fog:false}));
-  wall.position.set(0, 7.5, -22.5);
-  g.add(wall);
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,2.6,6), GOLD);
+  rod.position.y = 1.3;
+  g.add(rod);
+  g.position.set(0, 8.4, -2);
   scene.add(g);
 })();
 
-/* 社訓バナー（governance/rules.md より） */
-function banner(text, xpos){
-  const c = document.createElement('canvas'); c.width = 128; c.height = 640;
-  const x = c.getContext('2d');
-  x.fillStyle = '#F6EFDC'; x.fillRect(0,0,128,640);
-  x.strokeStyle = '#C9B896'; x.lineWidth = 5; x.strokeRect(6,6,116,628);
-  x.fillStyle = '#2B2118';
-  x.font = "600 52px 'Shippori Mincho', serif";
-  x.textAlign = 'center'; x.textBaseline = 'middle';
-  const chars = [...text];
-  const step = Math.min(66, 540/chars.length);
-  chars.forEach((ch,i)=> x.fillText(ch, 64, 60 + step*(i+.5)));
-  x.fillStyle = '#C94F32'; x.fillRect(48, 598, 32, 26);
-  const tex = new THREE.CanvasTexture(c);
+/* 社訓サインスタンド（governance/rules.md より） */
+function signStand(text, ruleNo, xpos, zpos, ry){
   const g = new THREE.Group();
-  const cloth = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 7),
-    new THREE.MeshStandardMaterial({map:tex, roughness:.95, side:THREE.DoubleSide}));
-  cloth.position.y = 6.2; cloth.castShadow = true;
-  const pole = cast(new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.9,8), M('#4A3A28')));
-  pole.rotation.z = Math.PI/2; pole.position.y = 9.8;
-  const stand = cast(new THREE.Mesh(new THREE.ConeGeometry(.9,.5,4), M('#2B2118')));
-  stand.position.y = .25;
-  const rope = new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,7,4), M('#4A3A28'));
-  rope.position.y = 5.0;
-  g.add(cloth, pole, stand, rope);
-  g.position.set(xpos, 0, -13.5);
+  const boardMesh = texturedPlane(2.5, 1.15, (x,W,H)=>{
+    x.fillStyle = '#FFFFFF';
+    x.fillRect(0,0,W,H);
+    x.strokeStyle = '#D4B36A'; x.lineWidth = 8;
+    x.strokeRect(10,10,W-20,H-20);
+    x.fillStyle = '#4A3A42';
+    x.font = "700 58px 'Zen Maru Gothic', sans-serif";
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText(text, W/2, H*.42);
+    x.fillStyle = '#E85E8A';
+    x.font = "500 30px 'IBM Plex Mono', monospace";
+    x.fillText(ruleNo, W/2, H*.76);
+  }, 640, 294);
+  boardMesh.material.side = THREE.DoubleSide;
+  boardMesh.position.y = 2.1;
+  const pole = cast(new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,1.6,8), GOLD));
+  pole.position.y = .8;
+  const base = cast(new THREE.Mesh(new THREE.CylinderGeometry(.42,.5,.1,20), GOLD));
+  base.position.y = .05;
+  g.add(boardMesh, pole, base);
+  g.position.set(xpos, 0, zpos); g.rotation.y = ry;
   scene.add(g);
 }
-banner('やったことは残す', -7.5);   // Rule #004
-banner('暴走が恥',          7.5);   // Rule #003
-banner('数字で判断する',   11.5);   // Rule #001
+signStand('やったことは残す', 'RULE #004', -10.8, -8.5, .5);
+signStand('暴走が恥',         'RULE #003',  10.8, -8.5, -.5);
+signStand('数字で判断する',   'RULE #001',  13.2, -1.5, -.7);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>wallDraws.forEach(f=>f()));
 
-/* 小物: 木・棚・観葉植物 */
+/* 小物: 桜色ツリー・棚・花・ラウンジ */
 (function props(){
-  const tree = new THREE.Group();
-  const trunk = cast(new THREE.Mesh(new THREE.CylinderGeometry(.22,.3,1.6,7), M('#9A7A50')));
-  trunk.position.y = .8;
-  const crown = cast(new THREE.Mesh(new THREE.IcosahedronGeometry(1.5,0), M('#B5A272')));
-  crown.position.y = 2.6;
-  tree.add(trunk, crown); tree.position.set(-11.5, 0, -9);
-  scene.add(tree);
+  function blossom(x, z, s){
+    const t = new THREE.Group();
+    const trunk = cast(new THREE.Mesh(new THREE.CylinderGeometry(.16*s,.24*s,1.5*s,7), M('#B99A85')));
+    trunk.position.y = .75*s;
+    t.add(trunk);
+    [[0,2.5,.0,1.3],[-.8,2.0,.3,.8],[.8,2.1,-.2,.8]].forEach(([bx,by,bz,br])=>{
+      const c = cast(new THREE.Mesh(new THREE.IcosahedronGeometry(br*s,0), M('#F2B8C6',.95)));
+      c.position.set(bx*s, by*s, bz*s);
+      t.add(c);
+    });
+    t.position.set(x,0,z);
+    scene.add(t);
+  }
+  blossom(-12.5, -9, 1.15);
+  blossom(13.5, 6.5, .95);
+  /* 白×金のシェルフ */
   const shelf = new THREE.Group();
   for(let i=0;i<3;i++){
-    const p = cast(box(2.4,.12,1, M('#C9A876'))); p.position.y = .7+i*.85; shelf.add(p);
+    const p = cast(box(2.4,.1,1, WHITE)); p.position.y = .7+i*.85; shelf.add(p);
   }
-  const side1 = cast(box(.12,2.6,1, M('#B99055'))); side1.position.set(-1.15,1.3,0);
-  const side2 = side1.clone(); side2.position.x = 1.15;
-  shelf.add(side1, side2);
-  shelf.position.set(-13, 0, -2); shelf.rotation.y = .5;
+  [[-1.1],[1.1]].forEach(([sx])=>{
+    const s = cast(box(.08,2.6,.08, GOLD)); s.position.set(sx,1.3,.4); shelf.add(s.clone()), s.position.z=-.4, shelf.add(s);
+  });
+  const vase = cast(new THREE.Mesh(new THREE.CylinderGeometry(.14,.1,.34,10), M('#FFFFFF',.4)));
+  vase.position.set(-.6, 2.6, 0);
+  const flower = cast(new THREE.Mesh(new THREE.IcosahedronGeometry(.22,0), M('#E86A96',.9)));
+  flower.position.set(-.6, 2.9, 0);
+  shelf.add(vase, flower);
+  shelf.position.set(-14.2, 0, -6); shelf.rotation.y = Math.PI/2.2;
   scene.add(shelf);
-  const pot = cast(new THREE.Mesh(new THREE.CylinderGeometry(.3,.22,.5,8), M('#B0603F')));
-  pot.position.set(12.5,.25,-6);
-  const leaf = cast(new THREE.Mesh(new THREE.ConeGeometry(.5,1.2,6), M('#7A9A5A')));
-  leaf.position.set(12.5,1.1,-6);
-  scene.add(pot, leaf);
+  /* ラウンジ（ブラッシュソファ + 金ローテーブル） */
+  const lounge = new THREE.Group();
+  function sofa(rx){
+    const s = new THREE.Group();
+    const seat = cast(box(2.2,.45,.9, M('#F2C7D2',.95))); seat.position.y = .38;
+    const back = cast(box(2.2,.6,.25, M('#F2C7D2',.95))); back.position.set(0,.75,-.35);
+    [[-1.05],[1.05]].forEach(([ax])=>{
+      const arm = cast(box(.22,.62,.9, M('#EDB8C6',.95))); arm.position.set(ax,.5,0); s.add(arm);
+    });
+    s.add(seat, back); s.rotation.y = rx;
+    return s;
+  }
+  const s1 = sofa(.5); s1.position.set(-1.6,0,.9);
+  const s2 = sofa(-.5); s2.position.set(1.6,0,.9);
+  const table = new THREE.Group();
+  const tt = cast(new THREE.Mesh(new THREE.CylinderGeometry(.7,.7,.06,26), M('#FFFFFF',.3)));
+  tt.position.y = .42;
+  const tl = cast(new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.42,8), GOLD));
+  tl.position.y = .21;
+  table.add(tt, tl);
+  table.position.z = -.4;
+  lounge.add(s1, s2, table);
+  lounge.position.set(-10.5, 0, 6.5); lounge.rotation.y = .5;
+  scene.add(lounge);
 })();
 
-/* デスク + 社員 */
-const woodTop = M('#D9B77E'), woodLeg = M('#B99055');
+/* デスク + 社員（白天板 × ゴールド脚） */
 function desk(){
   const g = new THREE.Group();
-  const top = cast(box(1.9,.1,.95, woodTop)); top.position.y = .78;
+  const top = cast(box(1.9,.09,.95, WHITE)); top.position.y = .78;
   g.add(top);
   [[-.85,-.38],[.85,-.38],[-.85,.38],[.85,.38]].forEach(([x,z])=>{
-    const l = cast(box(.09,.76,.09, woodLeg)); l.position.set(x,.38,z); g.add(l);
+    const l = cast(new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.76,8), GOLD));
+    l.position.set(x,.38,z); g.add(l);
   });
-  const base = cast(box(.62,.03,.42, M('#3A342C',.6))); base.position.set(0,.85,-.02);
-  const scr  = cast(box(.62,.4,.03, M('#23201B',.5))); scr.position.set(0,1.05,-.2); scr.rotation.x = -.18;
+  const base = cast(box(.62,.03,.42, M('#EDEAE6',.5))); base.position.set(0,.85,-.02);
+  const scr  = cast(box(.62,.4,.03, M('#3A3540',.5))); scr.position.set(0,1.05,-.2); scr.rotation.x = -.18;
   g.add(base, scr);
   const cup = cast(new THREE.Mesh(new THREE.CylinderGeometry(.05,.045,.12,8),
-    M(['#C94F32','#4F7FBF','#5FA173','#C9A24B'][Math.floor(Math.random()*4)],.7)));
+    M(['#E86A96','#7FA6D9','#7FBF98','#D4B36A'][Math.floor(Math.random()*4)],.6)));
   cup.position.set(.55,.9,.18);
-  const paper = new THREE.Mesh(new THREE.PlaneGeometry(.3,.22), M('#F6EFDC'));
-  paper.rotation.x = -Math.PI/2; paper.rotation.z = Math.random()-.5; paper.position.set(-.5,.84,.15);
-  g.add(cup, paper);
+  const vase = cast(new THREE.Mesh(new THREE.CylinderGeometry(.045,.035,.14,8), M('#FFFFFF',.35)));
+  vase.position.set(-.6,.91,.12);
+  const bud = cast(new THREE.Mesh(new THREE.IcosahedronGeometry(.06,0), M('#F2A0B8',.9)));
+  bud.position.set(-.6,1.02,.12);
+  g.add(cup, vase, bud);
   return g;
 }
 function person(a){
   const g = new THREE.Group();
-  const body = cast(new THREE.Mesh(new THREE.CylinderGeometry(.2,.26,.52,10), M(DEPT_COLOR[a.dept],.8)));
+  const body = cast(new THREE.Mesh(new THREE.CylinderGeometry(.2,.26,.52,10), M(DEPT_COLOR[a.dept],.75)));
   body.position.y = .82;
   const head = cast(new THREE.Mesh(new THREE.SphereGeometry(.2,14,12), M('#F2D3B3',.7)));
   head.position.y = 1.28;
   const hair = cast(new THREE.Mesh(new THREE.SphereGeometry(.21,12,8,0,Math.PI*2,0,Math.PI/2.4), M(a.hair,.85)));
   hair.position.y = 1.33;
-  const armL = cast(box(.09,.3,.09, M(DEPT_COLOR[a.dept],.8))); armL.position.set(-.26,.86,.1); armL.rotation.x = -.9;
+  const armL = cast(box(.09,.3,.09, M(DEPT_COLOR[a.dept],.75))); armL.position.set(-.26,.86,.1); armL.rotation.x = -.9;
   const armR = armL.clone(); armR.position.x = .26;
   g.add(body, head, hair, armL, armR);
   g.userData.head = head;
   return g;
 }
 
-const seats = {   /* [x, z, 向きy回転] */
+const seats = {
   jobs:[0,-6.2,0],
   sara:[-6.8,-3.2,.35], ken:[6.8,-3.2,-.35],
   planner:[-6.4,.8,0], reel:[-2.2,.8,0], caption:[2.2,.8,0], analytics:[6.4,.8,0],
@@ -445,8 +541,11 @@ AGENTS.forEach(a=>{
   const p = person(a); p.position.z = .62; g.add(p);
   g.position.set(x, 0, z); g.rotation.y = ry;
   if(a.id === 'jobs'){
-    const dais = cast(new THREE.Mesh(new THREE.CylinderGeometry(2.4,2.6,.3,24), M('#C9B27F')));
+    const dais = cast(new THREE.Mesh(new THREE.CylinderGeometry(2.4,2.6,.3,32), M('#FDFCFA',.4)));
     dais.position.y = .15; g.add(dais);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(2.5, .05, 8, 48), GOLD);
+    rim.rotation.x = Math.PI/2; rim.position.y = .3;
+    g.add(rim);
     d.position.y = .3; p.position.y = .3;
   }
   scene.add(g);
@@ -479,7 +578,6 @@ function renderDoc(i){
 }
 renderDoc(0);
 
-const logQueue = [];
 function log(who, what, color){
   const e = document.createElement('div');
   e.className = 'e';
@@ -498,8 +596,7 @@ function say(a, text, think){
   el.className = 'bub' + (think ? ' think' : '');
   el.innerHTML = `<span class="n" style="color:${DEPT_COLOR[a.dept]}">${a.name} <span style="opacity:.5;font-weight:400">${a.role}</span></span>${text}`;
   bubbles.appendChild(el);
-  const b = {el, id:a.id, until:performance.now()+4600};
-  activeBubs.push(b);
+  activeBubs.push({el, id:a.id, until:performance.now()+4600});
 }
 function removeBub(b){
   b.el.remove();
