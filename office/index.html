@@ -1,0 +1,674 @@
+<title>AI Company バーチャルオフィス</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Shippori+Mincho:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ink:#2B2118; --ink-soft:#6B5B49;
+    --panel:#FCF7EC; --panel-brd:#E4D8C2; --panel-dark:#1B140E; --panel-dark-ink:#F3E9D6;
+    --accent:#C94F32; --ok:#5FA173; --warn:#C98A2E;
+    --sns:#D96C8E; --sales:#4F7FBF; --acct:#5FA173; --ceo:#C9A24B; --cmo:#E0719B; --cto:#4F8FA8; --human:#8B8B8B;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  html,body{height:100%}
+  body{
+    margin:0; background:#E8D9B5; color:var(--ink);
+    font-family:'Zen Kaku Gothic New',"Hiragino Kaku Gothic ProN",sans-serif;
+    overflow:hidden; font-size:14px;
+  }
+  #scene{position:fixed; inset:0; display:block; touch-action:none; cursor:grab}
+  #scene:active{cursor:grabbing}
+
+  .hud{position:fixed; inset:0; pointer-events:none; z-index:10}
+  .hud > *{pointer-events:auto}
+
+  .chip{
+    display:inline-flex; align-items:center; gap:7px;
+    background:var(--panel); border:1px solid var(--panel-brd); border-radius:10px;
+    padding:7px 12px; box-shadow:0 2px 10px rgba(60,40,10,.12); font-weight:500;
+  }
+  .dot{width:8px;height:8px;border-radius:50%;flex:none}
+
+  /* 左上: 社名 */
+  .brand{position:absolute; top:16px; left:16px; display:flex; gap:8px; flex-wrap:wrap; max-width:calc(100vw - 32px)}
+  .brand .name{font-weight:700; letter-spacing:.02em}
+  .brand .sub{font-size:12px; color:var(--ink-soft)}
+  .agent-status{font-size:12px; color:var(--ink-soft)}
+  .agent-status b{color:var(--ink); font-weight:700}
+
+  /* 中央上: パイプライン */
+  .pipeline{position:absolute; top:16px; left:50%; transform:translateX(-50%);
+    display:flex; gap:2px; background:var(--panel); border:1px solid var(--panel-brd);
+    border-radius:12px; padding:5px; box-shadow:0 2px 10px rgba(60,40,10,.12)}
+  .stage{padding:5px 12px; border-radius:8px; font-size:12.5px; font-weight:500; color:var(--ink-soft); white-space:nowrap}
+  .stage.done{color:var(--ok)}
+  .stage.active{background:var(--ink); color:var(--panel-dark-ink); font-weight:700}
+  .stage .n{opacity:.55; margin-right:3px; font-family:var(--mono); font-size:11px}
+
+  /* 右上: 操作 */
+  .controls{position:absolute; top:16px; right:16px; display:flex; gap:8px}
+  button.chip{cursor:pointer; font:inherit; color:var(--ink); font-weight:500}
+  button.chip:hover{border-color:var(--ink-soft)}
+  button.chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  button.chip[aria-pressed="true"]{background:var(--ink); color:var(--panel-dark-ink); border-color:var(--ink)}
+  .live{color:var(--accent); font-weight:700; letter-spacing:.06em}
+  .live .dot{background:var(--accent)}
+  @media (prefers-reduced-motion:no-preference){
+    .live .dot{animation:pulse 1.6s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  }
+
+  /* 業務ボード */
+  .board{position:absolute; top:64px; left:50%; transform:translateX(-50%);
+    width:400px; max-width:calc(100vw - 32px);
+    background:var(--panel-dark); color:var(--panel-dark-ink);
+    border-radius:12px; border:1px solid #3A2C1E; box-shadow:0 8px 28px rgba(30,18,5,.35);
+    overflow:hidden}
+  .board h2{margin:0; padding:9px 14px; font-size:12px; font-weight:700; letter-spacing:.14em;
+    border-bottom:1px solid #3A2C1E; display:flex; justify-content:space-between; align-items:center}
+  .board h2 .cnt{font-family:var(--mono); font-weight:400; opacity:.6; letter-spacing:0}
+  .board ul{list-style:none; margin:0; padding:6px 0}
+  .board li{display:flex; align-items:center; gap:9px; padding:5px 14px; font-size:12.5px}
+  .board .who{opacity:.65; font-size:11.5px; flex:none; width:6em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .board .task{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .board .st{flex:none; font-size:11px; padding:2px 8px; border-radius:99px; border:1px solid transparent}
+  .st-0{color:#B8A88F; border-color:#4A3A28}
+  .st-1{color:#F0C36A; border-color:#7A5C22; background:rgba(240,195,106,.08)}
+  .st-2{color:#8FC7F0; border-color:#2F5A7A; background:rgba(143,199,240,.08)}
+  .st-3{color:#8FD9A0; border-color:#2F6A3E; background:rgba(143,217,160,.08)}
+
+  /* 成果物モニター */
+  .monitor{position:absolute; top:64px; right:16px; width:300px; max-width:calc(100vw - 32px);
+    background:var(--panel); border:1px solid var(--panel-brd); border-radius:12px;
+    box-shadow:0 4px 18px rgba(60,40,10,.18); overflow:hidden}
+  .monitor h2{margin:0; padding:9px 12px; font-size:12px; font-weight:700; letter-spacing:.1em;
+    display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--panel-brd)}
+  .monitor h2 .cnt{font-family:var(--mono); font-weight:400; color:var(--ink-soft)}
+  .doc{margin:10px 12px 8px; background:#fff; border:1px solid var(--panel-brd); border-radius:8px;
+    padding:10px 12px; min-height:118px}
+  .doc .t{font-weight:700; font-size:12.5px; margin-bottom:6px; text-align:center}
+  .doc .l{font-family:var(--mono); font-size:10.5px; color:var(--ink-soft); line-height:1.75;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .doc .l b{color:var(--ink); font-weight:500}
+  .files{display:flex; flex-wrap:wrap; gap:5px; padding:2px 12px 12px}
+  .file{font-family:var(--mono); font-size:10px; padding:3px 7px; border-radius:6px;
+    background:#F1E8D6; border:1px solid var(--panel-brd); color:var(--ink-soft);
+    transition:background .4s,color .4s,border-color .4s}
+  .file.hot{background:var(--ink); color:var(--panel-dark-ink); border-color:var(--ink)}
+
+  /* 活動ログ */
+  .log{position:absolute; left:16px; bottom:16px; width:330px; max-width:calc(100vw - 32px);
+    display:flex; flex-direction:column-reverse; gap:5px}
+  .log .e{display:flex; align-items:baseline; gap:8px; background:var(--panel);
+    border:1px solid var(--panel-brd); border-radius:9px; padding:6px 11px; font-size:12px;
+    box-shadow:0 2px 8px rgba(60,40,10,.10)}
+  .log .e .dot{align-self:center}
+  .log .e .who{font-weight:700; flex:none}
+  .log .e .what{color:var(--ink-soft); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .log .e:nth-child(n+2){opacity:.82}
+  .log .e:nth-child(n+4){opacity:.55}
+  .log .e:nth-child(n+6){opacity:.3}
+
+  /* 取締役会の間 */
+  .throne{position:absolute; right:16px; bottom:16px; width:300px; max-width:calc(100vw - 32px);
+    background:var(--panel); border:1px solid var(--panel-brd); border-radius:12px;
+    box-shadow:0 4px 18px rgba(60,40,10,.18)}
+  .throne h2{margin:0; padding:9px 12px; font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:8px}
+  .throne h2 .seal{width:16px;height:16px;border-radius:4px;background:var(--accent);flex:none;
+    color:#fff;font-size:10px;display:grid;place-items:center;font-weight:700}
+  .throne .body{border-top:1px solid var(--panel-brd); padding:9px 12px; font-size:12px; color:var(--ink-soft)}
+  .throne .row{display:flex; justify-content:space-between; gap:10px; padding:3px 0}
+  .throne .ok{color:var(--ok); font-weight:700; flex:none}
+  .throne .wait{color:var(--warn); font-weight:700; flex:none}
+  .throne .foot{display:flex; gap:7px; padding:0 12px 11px}
+  .throne .foot .chip{padding:5px 11px; font-size:12px; box-shadow:none}
+
+  /* 吹き出し */
+  .bubbles{position:absolute; inset:0; overflow:hidden; pointer-events:none}
+  .bub{position:absolute; transform:translate(-50%,-100%); max-width:230px;
+    background:#fff; border:1.5px solid var(--ink); border-radius:11px;
+    padding:6px 11px 7px; font-size:12.5px; line-height:1.45;
+    box-shadow:0 3px 10px rgba(60,40,10,.2); white-space:normal}
+  .bub::after{content:""; position:absolute; left:50%; bottom:-7px; transform:translateX(-50%) rotate(45deg);
+    width:11px; height:11px; background:#fff; border-right:1.5px solid var(--ink); border-bottom:1.5px solid var(--ink)}
+  .bub .n{display:block; font-size:10px; font-weight:700; margin-bottom:1px}
+  .bub.think{border-style:dashed; color:var(--ink-soft)}
+  .bub.think::after{border-style:dashed}
+
+  /* パネル開閉（モバイル） */
+  .panel-toggles{position:absolute; top:64px; left:16px; display:none; gap:8px}
+  @media (max-width:860px){
+    .board{left:16px; transform:none; width:auto; right:16px; top:110px}
+    .monitor{top:auto; bottom:76px; right:16px; width:auto; left:16px}
+    .throne{display:none}
+    .log{bottom:16px; width:auto; right:16px}
+    .log .e:nth-child(n+4){display:none}
+    .pipeline{top:60px; max-width:calc(100vw - 32px); overflow-x:auto}
+    .board.folded ul,.monitor.folded .doc,.monitor.folded .files{display:none}
+  }
+  [hidden]{display:none!important}
+</style>
+
+<canvas id="scene" aria-label="AI Companyのバーチャルオフィス3Dビュー"></canvas>
+
+<div class="hud">
+  <div class="brand">
+    <span class="chip"><span class="dot" style="background:var(--ceo)"></span>
+      <span><span class="name">AI Company</span> <span class="sub">第1幕・Tiaful立ち上げ</span></span></span>
+    <span class="chip agent-status" id="focusline"><span class="dot" style="background:var(--cmo)"></span><span>Sara（CMO）<b>指示中</b></span></span>
+  </div>
+
+  <nav class="pipeline" aria-label="案件パイプライン">
+    <span class="stage done"><span class="n">✓</span>受注</span>
+    <span class="stage done"><span class="n">✓</span>企画</span>
+    <span class="stage active"><span class="n">●</span>制作</span>
+    <span class="stage"><span class="n">4</span>検収</span>
+    <span class="stage"><span class="n">5</span>納品</span>
+  </nav>
+
+  <div class="controls">
+    <button class="chip" id="btn-cam" aria-pressed="true">自動カメラ</button>
+    <span class="chip live"><span class="dot"></span>LIVE</span>
+  </div>
+
+  <section class="board" id="board">
+    <h2>AI COMPANY ― 業務ボード <span class="cnt" id="board-cnt"></span></h2>
+    <ul id="board-list"></ul>
+  </section>
+
+  <section class="monitor" id="monitor">
+    <h2>成果物モニター <span class="cnt" id="mon-cnt"></span></h2>
+    <div class="doc">
+      <div class="t" id="doc-title"></div>
+      <div id="doc-body"></div>
+    </div>
+    <div class="files" id="files"></div>
+  </section>
+
+  <div class="log" id="log" aria-live="polite"></div>
+
+  <section class="throne">
+    <h2><span class="seal">承</span>取締役会（BIORA）の間</h2>
+    <div class="body">
+      <div class="row"><span>AI Company構想書</span><span class="ok">承認済</span></div>
+      <div class="row"><span>Tiafulローンチ方針（#005）</span><span class="ok">承認済</span></div>
+      <div class="row"><span>Meta広告 月次予算</span><span class="wait">承認待ち</span></div>
+    </div>
+    <div class="foot">
+      <button class="chip" id="btn-sim" aria-pressed="true">稼働中</button>
+      <button class="chip" id="btn-bubble" aria-pressed="true">独り言</button>
+    </div>
+  </section>
+
+  <div class="bubbles" id="bubbles"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+/* ===== 会社データ（すべて実在の体制・タスク・成果物に基づく） ===== */
+const DEPT_COLOR = {exec:'#C9A24B', cmo:'#E0719B', cto:'#4F8FA8', sns:'#D96C8E', sales:'#4F7FBF', acct:'#5FA173', human:'#8B8B8B'};
+const AGENTS = [
+  {id:'jobs', name:'Jobs', role:'CEO', dept:'exec', hair:'#3A3A3A',
+    lines:['「やりました」ではなく「ここにあります」で頼む','数字はどこ？感覚では判断しない','検収は妥協しない']},
+  {id:'sara', name:'Sara', role:'CMO', dept:'cmo', hair:'#7A4A2E',
+    lines:['導線のボタン、あと2px下げたい…','保存される投稿しか作らない','広告は月5万から。数字を見てから増額']},
+  {id:'ken', name:'Ken', role:'CTO', dept:'cto', hair:'#2E4A6A',
+    lines:['UTAGEの設定、あと3画面','人を雇う前に仕組みで解決する','Animakerなら顔出しゼロでいける']},
+  {id:'planner', name:'投稿企画', role:'SNS部', dept:'sns', hair:'#8A5A3A',
+    lines:['バズより継続。カレンダーが正義','来月の企画、あと4本…考え中…']},
+  {id:'reel', name:'リール台本', role:'SNS部', dept:'sns', hair:'#4A3A5A',
+    lines:['冒頭2秒で掴めない台本は台本ではない','Week0の台本、85分は長い…要圧縮']},
+  {id:'caption', name:'キャプション', role:'SNS部', dept:'sns', hair:'#6A4A2A',
+    lines:['ハッシュタグは数ではなく選定','1行目で止める。2行目で読ませる']},
+  {id:'analytics', name:'分析', role:'SNS部', dept:'sns', hair:'#3A5A4A',
+    lines:['保存率3.2%…もう一声','リーチよりフォロワー転換率を見て']},
+  {id:'hearing', name:'ヒアリング', role:'営業部', dept:'sales', hair:'#5A3A3A',
+    lines:['聞くべきは悩みではなく理想','質問項目、7個に絞りました']},
+  {id:'proposal', name:'提案', role:'営業部', dept:'sales', hair:'#3A4A6A',
+    lines:['提案書は相手の言葉で書く','KAZUさん向けスクリプト最終化中']},
+  {id:'dm', name:'DM', role:'営業部', dept:'sales', hair:'#4A4A4A',
+    lines:['営業っぽくないDMとは…考え中…','初回接触は売らない。役に立つ']},
+  {id:'quote', name:'見積', role:'経理部', dept:'acct', hair:'#5A5A3A',
+    lines:['この項目、見積もりに入ってます？','価格表、3プランで確定です']},
+  {id:'invoice', name:'請求', role:'経理部', dept:'acct', hair:'#3A5A5A',
+    lines:['支払期限は今日です（にっこり）','入金確認、あと1件']},
+  {id:'monthly', name:'月次', role:'経理部', dept:'acct', hair:'#6A5A4A',
+    lines:['経費精算、証憑がありません','今月の広告費、予算内です']},
+  {id:'kazu', name:'KAZU', role:'営業・人間', dept:'human', hair:'#2A2A2A',
+    lines:['（人間）休憩してきます','無料相談、今日は2件です']},
+];
+const byId = Object.fromEntries(AGENTS.map(a=>[a.id,a]));
+
+/* 決定#005「Tiafulローンチ」の実タスク */
+const TASKS = [
+  {t:'Tiaful Instagramアカウント開設', a:'sara', s:2},
+  {t:'Week0 オリエン動画の台本', a:'reel', s:1},
+  {t:'投稿カレンダー（Month1）', a:'planner', s:1},
+  {t:'キャプション・タグ設計', a:'caption', s:0},
+  {t:'Meta広告テスト計画（月5万円〜）', a:'analytics', s:0},
+  {t:'無料相談トークスクリプト', a:'proposal', s:1},
+  {t:'UTAGE会員サイトMVP構成', a:'ken', s:1},
+  {t:'受講プラン価格表・見積', a:'quote', s:3},
+];
+const ST_LABEL = ['待機中','作業中','検収待ち','完了'];
+
+/* projects/sns-school/ の実ファイル */
+const FILES = ['curriculum.md','reel-scripts.md','content-plan-month1.md','post-plan.md',
+  'grading-rubric.md','brand-guideline.md','canva-template-spec.md','hearing-sheet.md',
+  'marketing-plan.md','go-to-market.md'];
+
+const DOCS = [
+  {title:'{{curriculum.heading}}', file:'curriculum.md', lines:[
+    ['Week0','オリエンテーション ― 学び方と全体像'],
+    ['Week1','プロフィール設計 ― 3秒で伝わる肩書'],
+    ['Week2','投稿企画 ― ネタ切れしないカレンダー'],
+    ['Week3','リール制作 ― 顔出しなしの型'],
+    ['Week4','分析と改善 ― 保存率で判断する'],
+  ]},
+  {title:'Week0 台本ドラフト', file:'reel-scripts.md', lines:[
+    ['HOOK','「顔出しなしでSNSは伸びるのか？」'],
+    ['本編','受講の進め方 / 添削の受け方'],
+    ['演出','イラストモーション + AI音声'],
+    ['尺','85–100分 → 圧縮検討中'],
+    ['CTA','課題①プロフィール棚卸しへ'],
+  ]},
+  {title:'Meta広告テスト計画', file:'marketing-plan.md', lines:[
+    ['予算','月5万円 → 数値次第で10万円'],
+    ['配信面','Instagram リール / 発見タブ'],
+    ['KPI','CPL 3,000円以下で継続'],
+    ['LP','UTAGE無料相談フォーム直結'],
+    ['判定','2週間で継続/停止を判断'],
+  ]},
+];
+
+/* ===== 3Dシーン ===== */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#F3C288');
+scene.fog = new THREE.Fog('#F3C288', 40, 90);
+
+const camera = new THREE.PerspectiveCamera(42, 1, .1, 200);
+const camTarget = new THREE.Vector3(0, 1.1, 1.5);
+let camTheta = 0, camPhi = 1.02, camR = 23.5;
+
+scene.add(new THREE.HemisphereLight('#FFF3DC', '#B08A5A', .95));
+const sun = new THREE.DirectionalLight('#FFE1B0', .85);
+sun.position.set(-9, 14, 8);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, {left:-18, right:18, top:18, bottom:-14, far:50});
+scene.add(sun);
+
+const M = (c, rough=.9) => new THREE.MeshStandardMaterial({color:c, roughness:rough});
+const box = (w,h,d,mat) => new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+function cast(m){ m.castShadow = true; m.receiveShadow = true; return m; }
+
+/* 床 */
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 46), M('#DCCBA4'));
+floor.rotation.x = -Math.PI/2; floor.receiveShadow = true;
+scene.add(floor);
+const rug = new THREE.Mesh(new THREE.CircleGeometry(3.1, 40), M('#CBB27F'));
+rug.rotation.x = -Math.PI/2; rug.position.set(0, .01, -6.2); rug.receiveShadow = true;
+scene.add(rug);
+
+/* 背景の夕景スカイライン */
+(function skyline(){
+  const g = new THREE.Group();
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 256;
+  const x = c.getContext('2d');
+  const grad = x.createLinearGradient(0,0,0,256);
+  grad.addColorStop(0,'#F6CE93'); grad.addColorStop(1,'#EFA867');
+  x.fillStyle = grad; x.fillRect(0,0,1024,256);
+  x.fillStyle = 'rgba(150,95,50,.55)';
+  let px = 0;
+  while(px < 1024){
+    const w = 30+Math.random()*60, h = 40+Math.random()*130;
+    x.fillRect(px, 256-h, w, h);
+    px += w + 6+Math.random()*18;
+  }
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(60, 15),
+    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c), fog:false}));
+  wall.position.set(0, 7.5, -22.5);
+  g.add(wall);
+  scene.add(g);
+})();
+
+/* 社訓バナー（governance/rules.md より） */
+function banner(text, xpos){
+  const c = document.createElement('canvas'); c.width = 128; c.height = 640;
+  const x = c.getContext('2d');
+  x.fillStyle = '#F6EFDC'; x.fillRect(0,0,128,640);
+  x.strokeStyle = '#C9B896'; x.lineWidth = 5; x.strokeRect(6,6,116,628);
+  x.fillStyle = '#2B2118';
+  x.font = "600 52px 'Shippori Mincho', serif";
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  const chars = [...text];
+  const step = Math.min(66, 540/chars.length);
+  chars.forEach((ch,i)=> x.fillText(ch, 64, 60 + step*(i+.5)));
+  x.fillStyle = '#C94F32'; x.fillRect(48, 598, 32, 26);
+  const tex = new THREE.CanvasTexture(c);
+  const g = new THREE.Group();
+  const cloth = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 7),
+    new THREE.MeshStandardMaterial({map:tex, roughness:.95, side:THREE.DoubleSide}));
+  cloth.position.y = 6.2; cloth.castShadow = true;
+  const pole = cast(new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.9,8), M('#4A3A28')));
+  pole.rotation.z = Math.PI/2; pole.position.y = 9.8;
+  const stand = cast(new THREE.Mesh(new THREE.ConeGeometry(.9,.5,4), M('#2B2118')));
+  stand.position.y = .25;
+  const rope = new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,7,4), M('#4A3A28'));
+  rope.position.y = 5.0;
+  g.add(cloth, pole, stand, rope);
+  g.position.set(xpos, 0, -13.5);
+  scene.add(g);
+}
+banner('やったことは残す', -7.5);   // Rule #004
+banner('暴走が恥',          7.5);   // Rule #003
+banner('数字で判断する',   11.5);   // Rule #001
+
+/* 小物: 木・棚・観葉植物 */
+(function props(){
+  const tree = new THREE.Group();
+  const trunk = cast(new THREE.Mesh(new THREE.CylinderGeometry(.22,.3,1.6,7), M('#9A7A50')));
+  trunk.position.y = .8;
+  const crown = cast(new THREE.Mesh(new THREE.IcosahedronGeometry(1.5,0), M('#B5A272')));
+  crown.position.y = 2.6;
+  tree.add(trunk, crown); tree.position.set(-11.5, 0, -9);
+  scene.add(tree);
+  const shelf = new THREE.Group();
+  for(let i=0;i<3;i++){
+    const p = cast(box(2.4,.12,1, M('#C9A876'))); p.position.y = .7+i*.85; shelf.add(p);
+  }
+  const side1 = cast(box(.12,2.6,1, M('#B99055'))); side1.position.set(-1.15,1.3,0);
+  const side2 = side1.clone(); side2.position.x = 1.15;
+  shelf.add(side1, side2);
+  shelf.position.set(-13, 0, -2); shelf.rotation.y = .5;
+  scene.add(shelf);
+  const pot = cast(new THREE.Mesh(new THREE.CylinderGeometry(.3,.22,.5,8), M('#B0603F')));
+  pot.position.set(12.5,.25,-6);
+  const leaf = cast(new THREE.Mesh(new THREE.ConeGeometry(.5,1.2,6), M('#7A9A5A')));
+  leaf.position.set(12.5,1.1,-6);
+  scene.add(pot, leaf);
+})();
+
+/* デスク + 社員 */
+const woodTop = M('#D9B77E'), woodLeg = M('#B99055');
+function desk(){
+  const g = new THREE.Group();
+  const top = cast(box(1.9,.1,.95, woodTop)); top.position.y = .78;
+  g.add(top);
+  [[-.85,-.38],[.85,-.38],[-.85,.38],[.85,.38]].forEach(([x,z])=>{
+    const l = cast(box(.09,.76,.09, woodLeg)); l.position.set(x,.38,z); g.add(l);
+  });
+  const base = cast(box(.62,.03,.42, M('#3A342C',.6))); base.position.set(0,.85,-.02);
+  const scr  = cast(box(.62,.4,.03, M('#23201B',.5))); scr.position.set(0,1.05,-.2); scr.rotation.x = -.18;
+  g.add(base, scr);
+  const cup = cast(new THREE.Mesh(new THREE.CylinderGeometry(.05,.045,.12,8),
+    M(['#C94F32','#4F7FBF','#5FA173','#C9A24B'][Math.floor(Math.random()*4)],.7)));
+  cup.position.set(.55,.9,.18);
+  const paper = new THREE.Mesh(new THREE.PlaneGeometry(.3,.22), M('#F6EFDC'));
+  paper.rotation.x = -Math.PI/2; paper.rotation.z = Math.random()-.5; paper.position.set(-.5,.84,.15);
+  g.add(cup, paper);
+  return g;
+}
+function person(a){
+  const g = new THREE.Group();
+  const body = cast(new THREE.Mesh(new THREE.CylinderGeometry(.2,.26,.52,10), M(DEPT_COLOR[a.dept],.8)));
+  body.position.y = .82;
+  const head = cast(new THREE.Mesh(new THREE.SphereGeometry(.2,14,12), M('#F2D3B3',.7)));
+  head.position.y = 1.28;
+  const hair = cast(new THREE.Mesh(new THREE.SphereGeometry(.21,12,8,0,Math.PI*2,0,Math.PI/2.4), M(a.hair,.85)));
+  hair.position.y = 1.33;
+  const armL = cast(box(.09,.3,.09, M(DEPT_COLOR[a.dept],.8))); armL.position.set(-.26,.86,.1); armL.rotation.x = -.9;
+  const armR = armL.clone(); armR.position.x = .26;
+  g.add(body, head, hair, armL, armR);
+  g.userData.head = head;
+  return g;
+}
+
+const seats = {   /* [x, z, 向きy回転] */
+  jobs:[0,-6.2,0],
+  sara:[-6.8,-3.2,.35], ken:[6.8,-3.2,-.35],
+  planner:[-6.4,.8,0], reel:[-2.2,.8,0], caption:[2.2,.8,0], analytics:[6.4,.8,0],
+  hearing:[-6.4,4.6,0], proposal:[-2.2,4.6,0], dm:[2.2,4.6,0],
+  quote:[6.4,4.6,0], invoice:[9.8,2.7,-.3], monthly:[9.8,-0.9,-.3],
+  kazu:[-10.2,2.7,.4],
+};
+const rig = {};
+AGENTS.forEach(a=>{
+  const [x,z,ry] = seats[a.id];
+  const g = new THREE.Group();
+  const d = desk(); g.add(d);
+  const p = person(a); p.position.z = .62; g.add(p);
+  g.position.set(x, 0, z); g.rotation.y = ry;
+  if(a.id === 'jobs'){
+    const dais = cast(new THREE.Mesh(new THREE.CylinderGeometry(2.4,2.6,.3,24), M('#C9B27F')));
+    dais.position.y = .15; g.add(dais);
+    d.position.y = .3; p.position.y = .3;
+  }
+  scene.add(g);
+  rig[a.id] = {group:g, person:p, head:p.userData.head, present:true, phase:Math.random()*Math.PI*2};
+});
+
+/* ===== HUD ===== */
+const $ = id => document.getElementById(id);
+const boardList = $('board-list'), files = $('files'), logEl = $('log'), bubbles = $('bubbles');
+
+function renderBoard(){
+  boardList.innerHTML = TASKS.map(t=>{
+    const a = byId[t.a];
+    return `<li><span class="dot" style="background:${DEPT_COLOR[a.dept]}"></span>
+      <span class="who">${a.name}</span><span class="task">${t.t}</span>
+      <span class="st st-${t.s}">${ST_LABEL[t.s]}</span></li>`;
+  }).join('');
+  const done = TASKS.filter(t=>t.s===3).length;
+  $('board-cnt').textContent = `${done}/${TASKS.length} 完了`;
+}
+files.innerHTML = FILES.map(f=>`<span class="file" data-f="${f}">${f}</span>`).join('');
+$('mon-cnt').textContent = FILES.length;
+
+let docIdx = 0;
+function renderDoc(i){
+  docIdx = i;
+  const d = DOCS[i];
+  $('doc-title').textContent = d.title;
+  $('doc-body').innerHTML = d.lines.map(([k,v])=>`<div class="l"><b>${k}</b>　${v}</div>`).join('');
+}
+renderDoc(0);
+
+const logQueue = [];
+function log(who, what, color){
+  const e = document.createElement('div');
+  e.className = 'e';
+  e.innerHTML = `<span class="dot" style="background:${color}"></span><span class="who">${who}</span><span class="what">${what}</span>`;
+  logEl.prepend(e);
+  while(logEl.children.length > 6) logEl.lastChild.remove();
+}
+
+/* 吹き出し（3D頭上に投影） */
+const activeBubs = [];
+const v3 = new THREE.Vector3();
+function say(a, text, think){
+  if(!bubbleOn) return;
+  if(activeBubs.length >= 3) removeBub(activeBubs[0]);
+  const el = document.createElement('div');
+  el.className = 'bub' + (think ? ' think' : '');
+  el.innerHTML = `<span class="n" style="color:${DEPT_COLOR[a.dept]}">${a.name} <span style="opacity:.5;font-weight:400">${a.role}</span></span>${text}`;
+  bubbles.appendChild(el);
+  const b = {el, id:a.id, until:performance.now()+4600};
+  activeBubs.push(b);
+}
+function removeBub(b){
+  b.el.remove();
+  const i = activeBubs.indexOf(b);
+  if(i>=0) activeBubs.splice(i,1);
+}
+function layoutBubbles(){
+  const w = innerWidth, h = innerHeight, now = performance.now();
+  for(const b of [...activeBubs]){
+    if(now > b.until){ removeBub(b); continue; }
+    rig[b.id].head.getWorldPosition(v3);
+    v3.y += .55;
+    v3.project(camera);
+    if(v3.z > 1){ b.el.hidden = true; continue; }
+    b.el.hidden = false;
+    b.el.style.left = Math.min(Math.max((v3.x*.5+.5)*w, 90), w-90) + 'px';
+    b.el.style.top  = Math.max((-v3.y*.5+.5)*h, 60) + 'px';
+  }
+}
+
+/* ===== シミュレーション ===== */
+let simOn = true, bubbleOn = true, camAuto = true;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(reduced) camAuto = false;
+
+const focusEl = $('focusline');
+function setFocus(a, verb){
+  focusEl.innerHTML = `<span class="dot" style="background:${DEPT_COLOR[a.dept]}"></span><span>${a.name}（${a.role}）<b>${verb}</b></span>`;
+}
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function tick(){
+  if(!simOn) return;
+  const r = Math.random();
+  const working = AGENTS.filter(a=>rig[a.id].present);
+  if(r < .34){                       /* 独り言 */
+    const a = pick(working);
+    const think = Math.random() < .3;
+    say(a, think ? '考え中…' : pick(a.lines), think);
+  } else if(r < .56){                /* タスク前進 */
+    const cand = TASKS.filter(t=>t.s < 3);
+    if(cand.length){
+      const t = pick(cand);
+      t.s++;
+      const a = byId[t.a];
+      renderBoard();
+      const msg = t.s===1 ? `着手: ${t.t}` : t.s===2 ? `検収依頼: ${t.t}` : `完了: ${t.t}`;
+      log(a.name, msg, DEPT_COLOR[a.dept]);
+      setFocus(a, ST_LABEL[t.s]);
+      if(t.s===2) setTimeout(()=>{ if(simOn){ log('Jobs','検収中…数字を確認', DEPT_COLOR.exec); say(byId.jobs, pick(byId.jobs.lines)); }}, 2600);
+    }
+  } else if(r < .78){                /* 成果物更新 */
+    const f = pick(FILES);
+    const chip = files.querySelector(`[data-f="${f}"]`);
+    files.querySelectorAll('.file.hot').forEach(x=>x.classList.remove('hot'));
+    if(chip) chip.classList.add('hot');
+    const d = DOCS.find(x=>x.file===f);
+    if(d) renderDoc(DOCS.indexOf(d)); else renderDoc((docIdx+1)%DOCS.length);
+    const owner = pick(['reel','planner','caption','ken','sara']);
+    log(byId[owner].name, `成果物更新: ${f}`, DEPT_COLOR[byId[owner].dept]);
+    setFocus(byId[owner], '執筆中');
+  } else if(r < .9){                 /* 指示 */
+    const boss = pick([byId.jobs, byId.sara, byId.ken]);
+    const sub = pick(working.filter(a=>a.dept!=='exec' && a.dept!=='cmo' && a.dept!=='cto'));
+    log(boss.name, `指示: ${sub.name} → ${pick(TASKS).t}`, DEPT_COLOR[boss.dept]);
+    setFocus(boss, '指示中');
+  } else {                           /* 出退勤 */
+    const a = pick(working.filter(x=>!['jobs','sara','ken'].includes(x.id)));
+    const R = rig[a.id];
+    if(R.present && Math.random()<.5 && working.length > 8){
+      R.present = false; R.person.visible = false;
+      log(a.name, '業務完了・退勤', DEPT_COLOR[a.dept]);
+    } else if(!R.present){
+      R.present = true; R.person.visible = true;
+      log(a.name, '出社しました', DEPT_COLOR[a.dept]);
+    }
+  }
+  const backs = AGENTS.filter(a=>!rig[a.id].present);
+  if(backs.length && Math.random()<.3){
+    const a = pick(backs);
+    rig[a.id].present = true; rig[a.id].person.visible = true;
+    log(a.name, '出社しました', DEPT_COLOR[a.dept]);
+  }
+  schedule();
+}
+let timer = null;
+function schedule(){ clearTimeout(timer); timer = setTimeout(tick, 2300 + Math.random()*1800); }
+
+/* 初期ログ */
+log('Jobs','朝会: 本日の重点はTiaful立ち上げ', DEPT_COLOR.exec);
+log('Sara','指示: リール台本 → Week0台本の圧縮', DEPT_COLOR.cmo);
+log('リール台本','執筆中 reel-scripts.md', DEPT_COLOR.sns);
+renderBoard();
+schedule();
+setTimeout(()=>say(byId.reel, '冒頭2秒で掴めない台本は台本ではない'), 900);
+
+/* ===== カメラ操作 ===== */
+let dragging = false, lastX = 0, lastY = 0;
+canvas.addEventListener('pointerdown', e=>{ dragging = true; lastX = e.clientX; lastY = e.clientY; camAuto = false; syncCamBtn(); });
+addEventListener('pointerup', ()=> dragging = false);
+addEventListener('pointermove', e=>{
+  if(!dragging) return;
+  camTheta -= (e.clientX-lastX) * .005;
+  camPhi   -= (e.clientY-lastY) * .003;
+  camPhi = Math.min(1.42, Math.max(.55, camPhi));
+  camTheta = Math.min(.9, Math.max(-.9, camTheta));
+  lastX = e.clientX; lastY = e.clientY;
+});
+canvas.addEventListener('wheel', e=>{
+  e.preventDefault();
+  camR = Math.min(30, Math.max(9, camR + e.deltaY*.02));
+}, {passive:false});
+
+const camBtn = $('btn-cam');
+function syncCamBtn(){ camBtn.setAttribute('aria-pressed', String(camAuto)); }
+camBtn.addEventListener('click', ()=>{ camAuto = !camAuto; syncCamBtn(); });
+syncCamBtn();
+
+const simBtn = $('btn-sim');
+simBtn.addEventListener('click', ()=>{
+  simOn = !simOn;
+  simBtn.textContent = simOn ? '稼働中' : '停止中';
+  simBtn.setAttribute('aria-pressed', String(simOn));
+  if(simOn) schedule(); else clearTimeout(timer);
+});
+const bubBtn = $('btn-bubble');
+bubBtn.addEventListener('click', ()=>{
+  bubbleOn = !bubbleOn;
+  bubBtn.setAttribute('aria-pressed', String(bubbleOn));
+  if(!bubbleOn) [...activeBubs].forEach(removeBub);
+});
+
+/* モバイル: パネルをタップで開閉 */
+if(matchMedia('(max-width:860px)').matches){
+  $('board').classList.add('folded');
+  $('board').querySelector('h2').addEventListener('click', ()=>$('board').classList.toggle('folded'));
+  $('monitor').querySelector('h2').addEventListener('click', ()=>$('monitor').classList.toggle('folded'));
+}
+
+/* ===== ループ ===== */
+function resize(){
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+
+const clock = new THREE.Clock();
+function frame(){
+  requestAnimationFrame(frame);
+  const t = clock.getElapsedTime();
+  const th = camAuto ? Math.sin(t*.07)*.32 : camTheta;
+  if(camAuto) camTheta = th;
+  camera.position.set(
+    camTarget.x + camR*Math.sin(camPhi)*Math.sin(th),
+    camTarget.y + camR*Math.cos(camPhi),
+    camTarget.z + camR*Math.sin(camPhi)*Math.cos(th)
+  );
+  camera.lookAt(camTarget);
+  for(const id in rig){
+    const R = rig[id];
+    if(!R.present) continue;
+    R.person.position.y = (id==='jobs' ? .3 : 0) + Math.sin(t*2.2 + R.phase)*.015;
+    R.head.rotation.y = Math.sin(t*.5 + R.phase)*.3;
+  }
+  layoutBubbles();
+  renderer.render(scene, camera);
+}
+frame();
+</script>
